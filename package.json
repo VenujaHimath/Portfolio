@@ -5,7 +5,9 @@
   "scripts": {
     "clean": "node scripts/clean.mjs",
     "dev": "next dev",
-    "dev:fresh": "node scripts/dev-clean.mjs && next dev",
+    "dev:fresh": "node scripts/dev-clean.mjs && node scripts/copy-spline-viewer.mjs && next dev",
+    "postinstall": "node scripts/copy-spline-viewer.mjs",
+    "setup-spline": "node scripts/copy-spline-viewer.mjs",
     "setup-robot": "node scripts/import-tripo-robot.mjs",
     "build": "next build",
     "start": "next start",
@@ -14,6 +16,7 @@
   "dependencies": {
     "@react-three/drei": "^9.114.3",
     "@react-three/fiber": "^8.17.10",
+    "@splinetool/viewer": "^1.12.96",
     "framer-motion": "^11.15.0",
     "next": "^14.2.18",
     "nodemailer": "^6.9.16",

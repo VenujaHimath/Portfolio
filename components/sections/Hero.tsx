@@ -6,15 +6,16 @@ import { ParticleCanvas } from "@/components/ui/ParticleCanvas";
 import { TypeWriter } from "@/components/ui/TypeWriter";
 import { personal } from "@/lib/data";
 
-const RobotCanvas = dynamic(
+const SplineViewer = dynamic(
   () =>
-    import("@/components/robot/RobotCanvas").then((mod) => mod.RobotCanvas),
+    import("@/components/ui/SplineViewer").then((mod) => mod.SplineViewer),
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full min-h-[280px] w-full items-center justify-center rounded-2xl border border-surface-border/60 bg-background/40">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-accent-primary border-t-transparent" />
-      </div>
+      <div
+        className="h-full min-h-[280px] w-full animate-pulse rounded-2xl bg-surface/20"
+        aria-hidden
+      />
     ),
   }
 );
@@ -29,10 +30,9 @@ export function Hero() {
       <div className="grid-pattern pointer-events-none absolute inset-0 opacity-40" />
 
       <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-12">
-        {/* Text column — was the full-width centered hero */}
         <div className="order-2 text-center lg:order-1 lg:text-left">
           <motion.p
-            initial={{ opacity: 0, y: 16 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="font-mono text-sm uppercase tracking-[0.2em] text-text-muted"
@@ -41,7 +41,7 @@ export function Hero() {
           </motion.p>
 
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mt-6 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl md:text-5xl lg:text-6xl"
@@ -50,7 +50,7 @@ export function Hero() {
           </motion.h1>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mt-4 text-2xl font-medium text-text-muted sm:text-3xl"
@@ -63,7 +63,7 @@ export function Hero() {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.35 }}
             className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start"
@@ -84,20 +84,19 @@ export function Hero() {
           </motion.div>
         </div>
 
-        {/* 3D robot — replaces a static hero image slot */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
+          initial={false}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.15 }}
-          className="order-1 h-[min(50vh,380px)] w-full sm:h-[420px] lg:order-2 lg:h-[min(72vh,520px)]"
+          className="order-1 flex h-[min(55vh,420px)] w-full items-center justify-center sm:h-[460px] lg:order-2 lg:h-[min(78vh,560px)]"
         >
-          <RobotCanvas />
+          <SplineViewer />
         </motion.div>
       </div>
 
       <motion.a
         href="#about"
-        initial={{ opacity: 0 }}
+        initial={false}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
         className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 text-text-muted transition hover:text-accent-primary"
