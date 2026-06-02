@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0a0a0f;
+  --accent-primary: #7f77dd;
+  --accent-secondary: #1d9e75;
+  --accent-highlight: #ef9f27;
+  --text-primary: #f0efe8;
+  --text-muted: #8a8880;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+::selection {
+  background-color: rgba(127, 119, 221, 0.35);
+  color: var(--text-primary);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2a36;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7f77dd;
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-accent-primary to-accent-secondary bg-clip-text text-transparent;
+  }
+
+  .glass {
+    @apply border border-surface-border/60 bg-background/70 backdrop-blur-xl;
+  }
+
+  .grid-pattern {
+    background-image: linear-gradient(
+        rgba(127, 119, 221, 0.03) 1px,
+        transparent 1px
+      ),
+      linear-gradient(90deg, rgba(127, 119, 221, 0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .project-showcase-bg {
+    background-color: #0a0a0f;
+    background-image: radial-gradient(
+        circle at 15% 25%,
+        rgba(127, 119, 221, 0.14) 0%,
+        transparent 42%
+      ),
+      radial-gradient(
+        circle at 85% 75%,
+        rgba(29, 158, 117, 0.1) 0%,
+        transparent 40%
+      ),
+      radial-gradient(
+        1px 1px at 20px 30px,
+        rgba(127, 119, 221, 0.35) 0%,
+        transparent 100%
+      ),
+      radial-gradient(
+        1px 1px at 80px 120px,
+        rgba(240, 239, 232, 0.15) 0%,
+        transparent 100%
+      ),
+      radial-gradient(
+        1px 1px at 160px 60px,
+        rgba(127, 119, 221, 0.25) 0%,
+        transparent 100%
+      );
+    background-size: 100% 100%, 100% 100%, 200px 200px, 200px 200px, 200px 200px;
+  }
+}
