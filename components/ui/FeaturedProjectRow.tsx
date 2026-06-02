@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Project, personal } from "@/lib/data";
+import { Project } from "@/lib/data";
+import { getProjectGithubHref } from "@/lib/project-links";
 import { ProjectImageFrame } from "./ProjectImageFrame";
 
 interface FeaturedProjectRowProps {
@@ -20,6 +21,12 @@ function GitHubIcon({ className = "h-5 w-5" }: { className?: string }) {
       />
     </svg>
   );
+}
+
+function normalizeExternalUrl(url: string): string {
+  const trimmed = url.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
 }
 
 function ExternalLinkIcon({ className = "h-5 w-5" }: { className?: string }) {
@@ -42,8 +49,10 @@ export function FeaturedProjectRow({
 }: FeaturedProjectRowProps) {
   const title = project.showcaseTitle ?? project.title;
   const description = project.showcaseDescription ?? project.description;
-  const githubUrl = project.github ?? personal.github;
-  const externalUrl = project.externalUrl ?? githubUrl;
+  const githubUrl = getProjectGithubHref(project);
+  const externalUrl = project.externalUrl
+    ? normalizeExternalUrl(project.externalUrl)
+    : null;
 
   const imageBlock = (
     <div className="relative w-full min-w-0 lg:flex-1">
@@ -104,16 +113,19 @@ export function FeaturedProjectRow({
       </p>
 
       <div className="mt-6 flex items-center gap-4">
-        <a
-          href={githubUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-text-primary transition hover:text-accent-primary"
-          aria-label={`${title} on GitHub`}
-        >
-          <GitHubIcon />
-        </a>
-        {externalUrl && (
+        {githubUrl ? (
+          <a
+            href={githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-text-primary transition hover:text-accent-primary"
+            aria-label={`${title} on GitHub`}
+            title={githubUrl}
+          >
+            <GitHubIcon />
+          </a>
+        ) : null}
+        {externalUrl ? (
           <a
             href={externalUrl}
             target="_blank"
@@ -123,7 +135,7 @@ export function FeaturedProjectRow({
           >
             <ExternalLinkIcon />
           </a>
-        )}
+        ) : null}
       </div>
     </motion.div>
   );

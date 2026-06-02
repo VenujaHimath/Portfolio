@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Project } from "@/lib/data";
 import { Badge } from "./Badge";
-import { personal } from "@/lib/data";
+import { getProfileGithubHref, getProjectGithubHref } from "@/lib/project-links";
 import { ProjectImageFrame } from "./ProjectImageFrame";
 
 interface ProjectCardProps {
@@ -34,7 +34,7 @@ export function ProjectCard({
   index,
   featured = false,
 }: ProjectCardProps) {
-  const githubUrl = project.github ?? personal.github;
+  const githubUrl = getProjectGithubHref(project) ?? getProfileGithubHref();
   const displayTitle = project.showcaseTitle ?? project.title;
 
   return (
@@ -91,7 +91,12 @@ export function ProjectCard({
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 rounded-lg border border-surface-border px-3 py-1.5 text-sm text-text-muted transition-colors hover:border-accent-primary/50 hover:text-accent-primary"
-            aria-label={`View ${project.title} on GitHub`}
+            aria-label={
+              getProjectGithubHref(project)
+                ? `View ${project.title} on GitHub`
+                : "View my GitHub profile"
+            }
+            title={githubUrl}
           >
             <GitHubIcon />
             <span className="font-mono text-xs">Code</span>
