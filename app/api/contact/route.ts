@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateContactBody } from "@/lib/contact-validation";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { isEmailConfigured, sendContactEmail } from "@/lib/mail";
+import {
+  ContactEmailError,
+  isEmailConfigured,
+  sendContactEmail,
+} from "@/lib/mail";
 
 export const runtime = "nodejs";
 
@@ -29,7 +33,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Contact form is not configured yet. Please email directly or try again later.",
+            "Contact form is not configured on the server. Add RESEND_API_KEY and CONTACT_TO_EMAIL in Vercel → Settings → Environment Variables, then redeploy.",
         },
         { status: 503 }
       );
@@ -54,18 +58,16 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Contact API error:", error);
 
-    if (
-      error instanceof Error &&
-      error.message === "EMAIL_NOT_CONFIGURED"
-    ) {
-      return NextResponse.json(
-        { error: "Email service is not configured." },
-        { status: 503 }
-      );
+    if (error instanceof ContactEmailError) {
+      const status = error.code === "NOT_CONFIGURED" ? 503 : 500;
+      return NextResponse.json({ error: error.message }, { status });
     }
 
     return NextResponse.json(
-      { error: "Failed to send message. Please try again later." },
+      {
+        error:
+          "Failed to send message. Please try again later or use Email me directly below.",
+      },
       { status: 500 }
     );
   }

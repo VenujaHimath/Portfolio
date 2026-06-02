@@ -1,10 +1,23 @@
 import type { ContactPayload } from "./contact-validation";
 
+function env(name: string): string | undefined {
+  const raw = process.env[name];
+  if (!raw) return undefined;
+  const v = raw.trim();
+  if (
+    (v.startsWith('"') && v.endsWith('"')) ||
+    (v.startsWith("'") && v.endsWith("'"))
+  ) {
+    return v.slice(1, -1).trim();
+  }
+  return v;
+}
+
 function getContactTo(): string {
   return (
-    process.env.CONTACT_TO_EMAIL ||
-    process.env.CONTACT_EMAIL ||
-    "venuja.ranasingh1977@gmail.com"
+    env("CONTACT_TO_EMAIL") ||
+    env("CONTACT_EMAIL") ||
+    "venuja.ranasinghe1977@gmail.com"
   );
 }
 
@@ -25,12 +38,48 @@ function buildEmailHtml(payload: ContactPayload): string {
   `.trim();
 }
 
+export class ContactEmailError extends Error {
+  constructor(
+    message: string,
+    readonly code: "NOT_CONFIGURED" | "SEND_FAILED" | "INVALID_KEY"
+  ) {
+    super(message);
+    this.name = "ContactEmailError";
+  }
+}
+
+function parseResendError(body: string): string {
+  try {
+    const json = JSON.parse(body) as { message?: string };
+    const msg = json.message ?? body;
+
+    if (/invalid.*api.*key/i.test(msg)) {
+      return "Invalid Resend API key. Check RESEND_API_KEY in Vercel environment variables.";
+    }
+    if (/only send.*testing|verify a domain/i.test(msg)) {
+      return "Resend test mode: use CONTACT_TO_EMAIL matching your Resend account email, or verify a domain at resend.com/domains.";
+    }
+    if (/from.*not|sender/i.test(msg)) {
+      return "Invalid sender address. Set EMAIL_FROM to Portfolio <onboarding@resend.dev> or a verified domain in Resend.";
+    }
+
+    return msg;
+  } catch {
+    return "Could not send email. Check Resend settings and Vercel environment variables.";
+  }
+}
+
 async function sendViaResend(payload: ContactPayload): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) throw new Error("EMAIL_NOT_CONFIGURED");
+  const apiKey = env("RESEND_API_KEY");
+  if (!apiKey || apiKey === "re_your_key" || apiKey.startsWith("re_your")) {
+    throw new ContactEmailError(
+      "Resend API key is missing or still a placeholder. Add RESEND_API_KEY in Vercel → Settings → Environment Variables, then redeploy.",
+      "NOT_CONFIGURED"
+    );
+  }
 
   const from =
-    process.env.EMAIL_FROM || "Portfolio Contact <onboarding@resend.dev>";
+    env("EMAIL_FROM") || "Portfolio <onboarding@resend.dev>";
   const to = getContactTo();
 
   const res = await fetch("https://api.resend.com/emails", {
@@ -49,21 +98,27 @@ async function sendViaResend(payload: ContactPayload): Promise<void> {
   });
 
   if (!res.ok) {
-    const err = await res.text();
-    console.error("Resend error:", err);
-    throw new Error("EMAIL_SEND_FAILED");
+    const errBody = await res.text();
+    console.error("Resend error:", res.status, errBody);
+    const message = parseResendError(errBody);
+    throw new ContactEmailError(message, "SEND_FAILED");
   }
 }
 
 async function sendViaSmtp(payload: ContactPayload): Promise<void> {
-  const host = process.env.SMTP_HOST;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+  const host = env("SMTP_HOST");
+  const user = env("SMTP_USER");
+  const pass = env("SMTP_PASS");
 
-  if (!host || !user || !pass) throw new Error("EMAIL_NOT_CONFIGURED");
+  if (!host || !user || !pass) {
+    throw new ContactEmailError(
+      "SMTP is not fully configured. Set SMTP_HOST, SMTP_USER, and SMTP_PASS in Vercel.",
+      "NOT_CONFIGURED"
+    );
+  }
 
   const nodemailer = await import("nodemailer");
-  const port = Number(process.env.SMTP_PORT || "587");
+  const port = Number(env("SMTP_PORT") || "587");
 
   const transporter = nodemailer.createTransport({
     host,
@@ -73,7 +128,7 @@ async function sendViaSmtp(payload: ContactPayload): Promise<void> {
   });
 
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM || `"Portfolio" <${user}>`,
+    from: env("EMAIL_FROM") || `"Portfolio" <${user}>`,
     to: getContactTo(),
     replyTo: payload.email,
     subject: `Portfolio: message from ${payload.name}`,
@@ -83,22 +138,29 @@ async function sendViaSmtp(payload: ContactPayload): Promise<void> {
 }
 
 export function isEmailConfigured(): boolean {
+  const key = env("RESEND_API_KEY");
+  if (key && key !== "re_your_key" && !key.startsWith("re_your")) {
+    return true;
+  }
   return Boolean(
-    process.env.RESEND_API_KEY ||
-      (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS)
+    env("SMTP_HOST") && env("SMTP_USER") && env("SMTP_PASS")
   );
 }
 
 export async function sendContactEmail(payload: ContactPayload): Promise<void> {
-  if (process.env.RESEND_API_KEY) {
+  const resendKey = env("RESEND_API_KEY");
+  if (resendKey) {
     await sendViaResend(payload);
     return;
   }
 
-  if (process.env.SMTP_HOST) {
+  if (env("SMTP_HOST")) {
     await sendViaSmtp(payload);
     return;
   }
 
-  throw new Error("EMAIL_NOT_CONFIGURED");
+  throw new ContactEmailError(
+    "Contact email is not configured. Add RESEND_API_KEY (and CONTACT_TO_EMAIL) in Vercel, then redeploy.",
+    "NOT_CONFIGURED"
+  );
 }

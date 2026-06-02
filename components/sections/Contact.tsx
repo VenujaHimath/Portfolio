@@ -44,8 +44,9 @@ export function Contact() {
 
       if (!res.ok) {
         setErrorMessage(
-          data.error ||
-            "Could not send your message. Try emailing directly."
+          typeof data.error === "string"
+            ? data.error
+            : "Could not send your message. Try emailing directly."
         );
         setStatus("error");
         return;

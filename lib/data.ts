@@ -12,8 +12,8 @@ export const personal = {
   ],
   location: "Maharagama, Sri Lanka",
   email: "venuja.ranasingh1977@gmail.com",
-  github: "https://github.com/venuja-himath",
-  linkedin: "https://www.linkedin.com/in/venuja-himath-ranasinghe",
+  github: "https://github.com/VenujaHimath",
+  linkedin: "https://www.linkedin.com/in/venuja-ranasinghe-358b71367",
   bio: "Data Science undergrad at SLIIT obsessed with building real-world AI systems. I think in patterns — on the chessboard and in the data. Currently shipping MoodFit, a mental wellness AI app. I turn messy datasets into decisions.",
   cvPath: "/cv.pdf",
   cvFileName: "Venuja_Ranasinghe_CV.pdf",
@@ -60,6 +60,7 @@ export const projects: Project[] = [
     featured: true,
     showcase: true,
     image: "/projects/moodfit.png",
+    github: "https://github.com/VenujaHimath/MoodFit",
   },
   {
     id: "loan-risk",
@@ -85,6 +86,7 @@ export const projects: Project[] = [
     featured: true,
     showcase: true,
     image: "/projects/loan-risk.png",
+    github: "https://github.com/PabodaFdo/AI-Driven-Microfinance_Bank",
   },
   {
     id: "fittrack",
@@ -100,6 +102,7 @@ export const projects: Project[] = [
     featured: true,
     showcase: true,
     image: "/projects/fittrack.png",
+    github: "https://github.com/IT24103815/Fitness_Tracker_Mobile_App",
   },
   {
     id: "stroke-risk",
@@ -122,6 +125,7 @@ export const projects: Project[] = [
       "Scalable web-based enterprise solution with Spring Boot backend, RESTful APIs, and optimized MySQL schema.",
     tags: ["Java", "Spring Boot", "MySQL", "Hibernate/JPA"],
     domain: "Full-Stack",
+    github: "https://github.com/Sheneshi2004/Car-Service",
   },
 ];
 
